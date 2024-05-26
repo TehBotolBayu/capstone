@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rolename {
+  ADMIN
+  USER
+}
+
+model Roles {
+  id   Int      @id @default(autoincrement())
+  name Rolename
+  user Users[]
+}
+
+model Users {
+  id          String         @id @default(uuid())
+  email       String  @unique
+  phone       String
+  password    String
+  status      String
+  resetToken  String?
+  codeOTP     String?
+  OTPlimit    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  roleId      Int?
+  role        Roles?         @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  profile     Profiles?
+  review      Reviews[]
+}
+
+model Profiles {
+  id        String   @id @default(uuid())
+  name      String
+  country   String?
+  city      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  imageId   String?  @unique
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Reviews {
+  id        String   @id @default(uuid())
+  score     Float
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  courseId  String   @unique
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+
+model Recipes {
+  id          String        @id @default(uuid())
+  name       String
+  ingredients  String
+  tutorial  String
+  description String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  imageId     String?       @unique
+  userId    String   @unique
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review      Reviews[]
+}
+
+
+model Images {
+  id        String      @id @default(uuid())
+  url       String
+  title     String
+  metadata  Json
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
